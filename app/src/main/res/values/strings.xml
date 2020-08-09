@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TeslaInventoryApp</string>
+    <string name="sold_out">Sold out!</string>
+    <string name="get_started_by_adding_a_tesla">Get started by adding a Tesla.</string>
+</resources>
