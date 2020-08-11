@@ -44,9 +44,6 @@ public abstract class TeslaDatabase extends RoomDatabase {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            teslaDao.insert(new Tesla("Model S","78.000,00 $","14","The best car in the World!","NEW", "WHITE","true","true",3));
-            teslaDao.insert(new Tesla("Model X","99.000,00 $","10","The best electrical car in the World!","USED", "BLACK","true","true",3));
-            teslaDao.insert(new Tesla("Cybertruck","50.000,00 $","1","Brand new truck.","NEW", "GRAY","false","true",5));
 
             return null;
         }

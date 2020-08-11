@@ -25,6 +25,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_ID_2 = "com.example.teslainventory.EX_ID_2";
     public static final String EXTRA_MODEL_2 = "com.example.teslainventory.EXTRA_TITLE_2";
+    public static final String EXTRA_IMAGE_2 = "com.example.teslainventory.EXTRA_IMAGE_2";
     public static final String EXTRA_DESCRIPTION_2 = "com.example.teslainventory.EXTRA_DESCRIPTION_2";
     public static final String EXTRA_INVENTORY_TYPE_2 = "com.example.teslainventory.EXTRA_INVENTORY_TYPE_2";
     public static final String EXTRA_EXTERIOR_PAINT_2 = "com.example.teslainventory.EXTRA_EXTERIOR_PAINT_2";
@@ -148,13 +149,13 @@ public class DetailsActivity extends AppCompatActivity {
             setResult(RESULT_OK, intentSender);
             finish();
 
-            Toast.makeText(this,"details success", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
+
         }
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
     }
 }

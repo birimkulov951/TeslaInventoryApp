@@ -1,9 +1,15 @@
 package com.example.teslainventory.ui;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,21 +18,31 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.teslainventory.R;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 public class AddEditTeslaActivity extends AppCompatActivity {
 
+    public static final int REQUEST_IMAGE_CAPTURE = 4;
     public static final String EXTRA_ID = "com.example.teslainventory.EX_ID";
     public static final String EXTRA_MODEL = "com.example.teslainventory.EXTRA_TITLE";
+    public static final String EXTRA_IMAGE = "com.example.teslainventory.EXTRA_IMAGE";
     public static final String EXTRA_DESCRIPTION = "com.example.teslainventory.EXTRA_DESCRIPTION";
     public static final String EXTRA_INVENTORY_TYPE = "com.example.teslainventory.EXTRA_INVENTORY_TYPE";
     public static final String EXTRA_EXTERIOR_PAINT = "com.example.teslainventory.EXTRA_EXTERIOR_PAINT";
@@ -35,21 +51,21 @@ public class AddEditTeslaActivity extends AppCompatActivity {
     public static final String EXTRA_PRIORITY = "com.example.teslainventory.EXTRA_PRIORITY";
 
     // View Casting
-    private ImageButton btPrevious, btNext;
+    private ImageView teslaPhoto;
+    private ImageButton btPrevious, btNext, addPhoto;
     private TextSwitcher textSwitcher;
     private String[] models = {"Model S","Model 3", "Model X","Model Y","Roadster(2020)","Tesla Semi","Cybertruck","Roadster(2008)"};
     int countModels = models.length;
     int position = 0;
-    private EditText editDescription;
-    private EditText editInventoryType;
-    private EditText editExteriorPaint;
-    private EditText editAvailabilityQuantity;
-    private EditText editPrice;
+    private EditText editDescription, editInventoryType, editExteriorPaint, editAvailabilityQuantity, editPrice;
     private NumberPicker numberPickerPriority;
 
-    private boolean teslaHasChanged = false;
 
+    private boolean teslaHasChanged = false;
     private Intent intent;
+    private Bitmap bitmap;
+    private File finalFile;
+
     /**
      * OnTouchListener that listens for any user touches on a View, implying that they are modifying
      * the view, and we change the mPetHasChanged boolean to true.
@@ -65,6 +81,19 @@ public class AddEditTeslaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_tesla);
+
+        teslaPhoto = findViewById(R.id.tesla_image);
+        addPhoto = findViewById(R.id.add_photo);
+        addPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                ActivityCompat.requestPermissions(AddEditTeslaActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_IMAGE_CAPTURE);
+                if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePhotoIntent,REQUEST_IMAGE_CAPTURE);
+                }
+            }
+        });
 
         textSwitcherMethod();
         numberPickerMethod();
@@ -102,62 +131,43 @@ public class AddEditTeslaActivity extends AppCompatActivity {
 
     }
 
-    private void saveTeslaCar() {
-        int id = intent.getIntExtra(EXTRA_ID, -1);
-        TextView model = (TextView) textSwitcher.getCurrentView();
-        String description = editDescription.getText().toString();
-        String inventoryType = editInventoryType.getText().toString();
-        String exteriorPaint = editExteriorPaint.getText().toString();
-        String availableQuantity = editAvailabilityQuantity.getText().toString();
-        String price = editPrice.getText().toString();
-        int priority = numberPickerPriority.getValue();
 
-        if (description.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a description", Toast.LENGTH_SHORT).show();
-            return;
-        } else if (inventoryType.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a inventory type", Toast.LENGTH_SHORT).show();
-            return;
-        }if (exteriorPaint.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a exterior paint", Toast.LENGTH_SHORT).show();
-            return;
-        }if (availableQuantity.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a available quantity", Toast.LENGTH_SHORT).show();
-            return;
-        }if (price.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a price", Toast.LENGTH_SHORT).show();
-            return;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            teslaPhoto.setImageBitmap(imageBitmap);
+
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), imageBitmap);
+
+            System.out.println("Hello1" + tempUri);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println("Hello2" + finalFile);
         }
-
-        if (intent.hasExtra(EXTRA_ID)) {
-            Intent intentSender = new Intent();
-            intentSender.putExtra(EXTRA_ID, id);
-            intentSender.putExtra(EXTRA_MODEL, model.getText());
-            intentSender.putExtra(EXTRA_DESCRIPTION, description);
-            intentSender.putExtra(EXTRA_INVENTORY_TYPE, inventoryType);
-            intentSender.putExtra(EXTRA_EXTERIOR_PAINT, exteriorPaint);
-            intentSender.putExtra(EXTRA_AVAILABLE_QUANTITY, availableQuantity);
-            intentSender.putExtra(EXTRA_PRICE, price);
-            intentSender.putExtra(EXTRA_PRIORITY, priority);
-            setResult(RESULT_OK, intentSender);
-            finish();
-        } else {
-            Intent data = new Intent();
-            data.putExtra(EXTRA_MODEL, model.getText());
-            data.putExtra(EXTRA_DESCRIPTION, description);
-            data.putExtra(EXTRA_INVENTORY_TYPE, inventoryType);
-            data.putExtra(EXTRA_EXTERIOR_PAINT, exteriorPaint);
-            data.putExtra(EXTRA_AVAILABLE_QUANTITY, availableQuantity);
-            data.putExtra(EXTRA_PRICE, price);
-            data.putExtra(EXTRA_PRIORITY, priority);
-            if (id != -1) {
-                data.putExtra(EXTRA_ID, id);
-            }
-            setResult(RESULT_OK, data);
-            finish();
-        }
-
     }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -175,6 +185,68 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         }
     }
 
+    private void saveTeslaCar() {
+        int id = intent.getIntExtra(EXTRA_ID, -1);
+        TextView model = (TextView) textSwitcher.getCurrentView();
+        String image = finalFile.toString();
+        String description = editDescription.getText().toString();
+        String inventoryType = editInventoryType.getText().toString();
+        String exteriorPaint = editExteriorPaint.getText().toString();
+        String availableQuantity = editAvailabilityQuantity.getText().toString();
+        String price = editPrice.getText().toString();
+        int priority = numberPickerPriority.getValue();
+
+        if (description.trim().isEmpty()) {
+            Toast.makeText(this, "Please insert a description", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (inventoryType.trim().isEmpty()) {
+            Toast.makeText(this, "Please insert a inventory type", Toast.LENGTH_SHORT).show();
+            return;
+        }else if (exteriorPaint.trim().isEmpty()) {
+            Toast.makeText(this, "Please insert a exterior paint", Toast.LENGTH_SHORT).show();
+            return;
+        }else if (availableQuantity.trim().isEmpty()) {
+            Toast.makeText(this, "Please insert a available quantity", Toast.LENGTH_SHORT).show();
+            return;
+        }else if (price.trim().isEmpty()) {
+            Toast.makeText(this, "Please insert a price", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (image.trim().isEmpty()) {
+            Toast.makeText(this, "Please take a picture of the car", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (intent.hasExtra(EXTRA_ID)) {
+            Intent intentSender = new Intent();
+            intentSender.putExtra(EXTRA_ID, id);
+            intentSender.putExtra(EXTRA_MODEL, model.getText());
+            intentSender.putExtra(EXTRA_IMAGE,image);
+            intentSender.putExtra(EXTRA_DESCRIPTION, description);
+            intentSender.putExtra(EXTRA_INVENTORY_TYPE, inventoryType);
+            intentSender.putExtra(EXTRA_EXTERIOR_PAINT, exteriorPaint);
+            intentSender.putExtra(EXTRA_AVAILABLE_QUANTITY, availableQuantity);
+            intentSender.putExtra(EXTRA_PRICE, price);
+            intentSender.putExtra(EXTRA_PRIORITY, priority);
+            setResult(RESULT_OK, intentSender);
+            finish();
+        } else {
+            Intent data = new Intent();
+            data.putExtra(EXTRA_MODEL, model.getText());
+            data.putExtra(EXTRA_IMAGE,image);
+            data.putExtra(EXTRA_DESCRIPTION, description);
+            data.putExtra(EXTRA_INVENTORY_TYPE, inventoryType);
+            data.putExtra(EXTRA_EXTERIOR_PAINT, exteriorPaint);
+            data.putExtra(EXTRA_AVAILABLE_QUANTITY, availableQuantity);
+            data.putExtra(EXTRA_PRICE, price);
+            data.putExtra(EXTRA_PRIORITY, priority);
+            if (id != -1) {
+                data.putExtra(EXTRA_ID, id);
+            }
+            setResult(RESULT_OK, data);
+            finish();
+        }
+
+    }
 
     /**
      * This method is called when the back button is pressed.

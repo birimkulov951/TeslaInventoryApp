@@ -14,9 +14,11 @@ public class Tesla {
     private String mDescription;
     private String mInventoryType;
     private String mExteriorPaint;
+    private String mTeslaImage;
 
     private String mGlassRoof;
     private String mAutoPilot;
+
     private int mPriority;
 
     public Tesla(String mModel,
@@ -25,6 +27,7 @@ public class Tesla {
                  String mDescription,
                  String mInventoryType,
                  String mExteriorPaint,
+                 String mTeslaImage,
                  String mGlassRoof,
                  String mAutoPilot,
                  int mPriority) {
@@ -34,6 +37,7 @@ public class Tesla {
         this.mDescription = mDescription;
         this.mInventoryType = mInventoryType;
         this.mExteriorPaint = mExteriorPaint;
+        this.mTeslaImage = mTeslaImage;
         this.mGlassRoof = mGlassRoof;
         this.mAutoPilot = mAutoPilot;
         this.mPriority = mPriority;
@@ -69,6 +73,10 @@ public class Tesla {
 
     public String getExteriorPaint() {
         return mExteriorPaint;
+    }
+
+    public String getTeslaImage() {
+        return mTeslaImage;
     }
 
     public String getGlassRoof() {

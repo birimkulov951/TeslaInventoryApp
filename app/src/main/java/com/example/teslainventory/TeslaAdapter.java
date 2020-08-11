@@ -1,8 +1,11 @@
 package com.example.teslainventory;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +14,8 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.teslainventory.room.Tesla;
+
+import java.io.File;
 
 public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
 
@@ -26,11 +31,12 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
         public boolean areContentsTheSame(@NonNull Tesla oldItem, @NonNull Tesla newItem) {
             return oldItem.getId() == newItem.getId() &&
                     oldItem.getModel().equals(newItem.getModel()) &&
-                    oldItem.getPrice().equals(newItem.getPrice()) &&
-                    oldItem.getAvailableQuantity().equals(newItem.getAvailableQuantity()) &&
                     oldItem.getDescription().equals(newItem.getDescription()) &&
+                    oldItem.getAvailableQuantity().equals(newItem.getAvailableQuantity()) &&
                     oldItem.getInventoryType().equals(newItem.getInventoryType()) &&
                     oldItem.getExteriorPaint().equals(newItem.getExteriorPaint()) &&
+                    oldItem.getTeslaImage().equals(newItem.getTeslaImage()) &&
+                    oldItem.getPrice().equals(newItem.getPrice()) &&
                     oldItem.getPriority() == newItem.getPriority();
         }
     };
@@ -56,6 +62,17 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
         holder.mDescription.setText(currentTesla.getDescription());
         holder.mInventoryType.setText(currentTesla.getInventoryType());
         holder.mExteriorPaint.setText(currentTesla.getExteriorPaint());
+
+        File imgFile = new File(currentTesla.getTeslaImage());
+
+        if(imgFile.exists()){
+
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+            holder.mTeslaImage.setImageBitmap(myBitmap);
+
+        }
+
     }
 
     public Tesla getTeslaAt(int position) {
@@ -74,6 +91,7 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
         private TextView mDescription;
         private TextView mInventoryType;
         private TextView mExteriorPaint;
+        private ImageView mTeslaImage;
 
 
         public TeslaHolder(@NonNull View itemView) {
@@ -84,6 +102,7 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
             mDescription = itemView.findViewById(R.id.description);
             mInventoryType = itemView.findViewById(R.id.inventory_type);
             mExteriorPaint = itemView.findViewById(R.id.exterior_paint);
+            mTeslaImage = itemView.findViewById(R.id.image_view_tesla);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -2,11 +2,13 @@ package com.example.teslainventory.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int ADD_TESLA_REQUEST = 1;
     public static final int EDIT_TESLA_REQUEST = 2;
-    public static final int EDIT_TESLA_REQUEST_DETAILS = 3;
 
     private TeslaViewModel inventoryViewModel;
     private TextView mEmptyText,mEmptyText2;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         mEmptyText = findViewById(R.id.empty_text);
         mEmptyText2 = findViewById(R.id.empty_text_2);
+
         FloatingActionButton buttonAddNote = findViewById(R.id.button_add_tesla_car);
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == ADD_TESLA_REQUEST && resultCode == RESULT_OK) {
 
             String model = data.getStringExtra(AddEditTeslaActivity.EXTRA_MODEL);
+            String image = data.getStringExtra(AddEditTeslaActivity.EXTRA_IMAGE);
             String description = data.getStringExtra(AddEditTeslaActivity.EXTRA_DESCRIPTION);
             String inventoryType = data.getStringExtra(AddEditTeslaActivity.EXTRA_INVENTORY_TYPE);
             String exteriorPaint = data.getStringExtra(AddEditTeslaActivity.EXTRA_EXTERIOR_PAINT);
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             String price = data.getStringExtra(AddEditTeslaActivity.EXTRA_PRICE);
             int priority = data.getIntExtra(AddEditTeslaActivity.EXTRA_PRIORITY, 1);
 
-            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,null,null,priority);
+            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
 
             inventoryViewModel.insert(tesla);
 
@@ -136,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String model = data.getStringExtra(DetailsActivity.EXTRA_MODEL_2);
+            String image = data.getStringExtra(DetailsActivity.EXTRA_IMAGE_2);
             String description = data.getStringExtra(DetailsActivity.EXTRA_DESCRIPTION_2);
             String inventoryType = data.getStringExtra(DetailsActivity.EXTRA_INVENTORY_TYPE_2);
             String exteriorPaint = data.getStringExtra(DetailsActivity.EXTRA_EXTERIOR_PAINT_2);
@@ -143,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             String price = data.getStringExtra(DetailsActivity.EXTRA_PRICE_2);
             int priority = data.getIntExtra(DetailsActivity.EXTRA_PRIORITY_2, 1);
 
-            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,null,null,priority);
+            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
 
             tesla.setId(id);
 
@@ -151,8 +155,6 @@ public class MainActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
 
-        } else if (requestCode == EDIT_TESLA_REQUEST_DETAILS) {
-            Toast.makeText(this,"reqest code 2",Toast.LENGTH_LONG).show();
         }
     }
 

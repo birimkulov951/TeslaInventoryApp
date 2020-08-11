@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.teslainventory">
 
+    <uses-feature
+        android:name="android.hardware.Camera"
+        android:required="true"/>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,8 +26,13 @@
         </activity>
 
         <activity android:name=".ui.AddEditTeslaActivity" />
+
         <activity android:name=".ui.DetailsActivity"
-            android:label="Details"/>
+            android:label="Details">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity" />
+        </activity>
 
     </application>
 
