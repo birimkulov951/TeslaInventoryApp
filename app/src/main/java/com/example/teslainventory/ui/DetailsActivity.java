@@ -1,7 +1,13 @@
 package com.example.teslainventory.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,10 +20,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.teslainventory.R;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_AVAILABLE_QUANTITY;
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_DESCRIPTION;
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_EXTERIOR_PAINT;
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_ID;
+import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_IMAGE;
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_INVENTORY_TYPE;
 import static com.example.teslainventory.ui.AddEditTeslaActivity.EXTRA_MODEL;
 
@@ -56,6 +66,9 @@ public class DetailsActivity extends AppCompatActivity {
         intentReceiver = getIntent();
         if (intentReceiver.hasExtra(EXTRA_ID_2)) {
             mId = intentReceiver.getIntExtra(EXTRA_ID_2,-1);
+            File imgFile = new  File(intentReceiver.getStringExtra(EXTRA_IMAGE_2));
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            mImageView.setImageBitmap(myBitmap);
             mModel.setText(intentReceiver.getStringExtra(EXTRA_MODEL_2));
             mDescription.setText(intentReceiver.getStringExtra(EXTRA_DESCRIPTION_2));
             mInventoryType.setText(intentReceiver.getStringExtra(EXTRA_INVENTORY_TYPE_2));
@@ -91,6 +104,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         int id = mId;
         String model = mModel.getText().toString();
+        String image = intentReceiver.getStringExtra(EXTRA_IMAGE_2);
         String description = intentReceiver.getStringExtra(EXTRA_DESCRIPTION_2);
         String inventoryType = intentReceiver.getStringExtra(EXTRA_INVENTORY_TYPE_2);
         String exteriorPaint = intentReceiver.getStringExtra(EXTRA_EXTERIOR_PAINT_2);
@@ -98,10 +112,10 @@ public class DetailsActivity extends AppCompatActivity {
         String price = intentReceiver.getStringExtra(EXTRA_PRICE_2);
         int priority = intentReceiver.getIntExtra(EXTRA_PRIORITY_2,1);
 
-
         Intent intentSender = new Intent(DetailsActivity.this, AddEditTeslaActivity.class);
         intentSender.putExtra(EXTRA_ID, id);
         intentSender.putExtra(EXTRA_MODEL, model);
+        intentSender.putExtra(EXTRA_IMAGE, image);
         intentSender.putExtra(EXTRA_DESCRIPTION, description);
         intentSender.putExtra(EXTRA_INVENTORY_TYPE, inventoryType);
         intentSender.putExtra(EXTRA_EXTERIOR_PAINT, exteriorPaint);
@@ -119,6 +133,7 @@ public class DetailsActivity extends AppCompatActivity {
 
             int id = data.getIntExtra(AddEditTeslaActivity.EXTRA_ID,-1);
             String model = data.getStringExtra(AddEditTeslaActivity.EXTRA_MODEL);
+            String image = data.getStringExtra(AddEditTeslaActivity.EXTRA_IMAGE);
             String description = data.getStringExtra(AddEditTeslaActivity.EXTRA_DESCRIPTION);
             String inventoryType = data.getStringExtra(AddEditTeslaActivity.EXTRA_INVENTORY_TYPE);
             String exteriorPaint = data.getStringExtra(AddEditTeslaActivity.EXTRA_EXTERIOR_PAINT);
@@ -129,6 +144,7 @@ public class DetailsActivity extends AppCompatActivity {
             if (data.hasExtra(AddEditTeslaActivity.EXTRA_ID)) {
                 mId = id;
                 mModel.setText(model);
+                mImageView.setImageBitmap(showImageByUriPath(image));
                 mDescription.setText(description);
                 mInventoryType.setText(inventoryType);
                 mExteriorPaint.setText(exteriorPaint);
@@ -140,6 +156,7 @@ public class DetailsActivity extends AppCompatActivity {
             intentSender = new Intent();
             intentSender.putExtra(EXTRA_ID_2, id);
             intentSender.putExtra(EXTRA_MODEL_2, model);
+            intentSender.putExtra(EXTRA_IMAGE_2, image);
             intentSender.putExtra(EXTRA_DESCRIPTION_2, description);
             intentSender.putExtra(EXTRA_INVENTORY_TYPE_2, inventoryType);
             intentSender.putExtra(EXTRA_EXTERIOR_PAINT_2, exteriorPaint);
@@ -154,8 +171,13 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+
+
+    private Bitmap showImageByUriPath(String uriPathStr) {
+        File imgFile = new  File(uriPathStr);
+        Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+        return myBitmap;
     }
+
+
 }

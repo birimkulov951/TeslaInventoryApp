@@ -56,9 +56,9 @@
             android:id="@+id/tesla_image"
             android:layout_marginTop="8dp"
             android:layout_width="250dp"
-            android:layout_height="100dp"
+            android:layout_height="300dp"
             android:layout_gravity="center"
-            android:src="@mipmap/ic_launcher"/>
+            android:src="@drawable/ic_tesla"/>
 
         <ImageButton
             android:id="@+id/add_photo"

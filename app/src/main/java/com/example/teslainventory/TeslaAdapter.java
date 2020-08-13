@@ -71,6 +71,9 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
 
             holder.mTeslaImage.setImageBitmap(myBitmap);
 
+        } else {
+
+            holder.mTeslaImage.setImageResource(R.drawable.ic_tesla);
         }
 
     }

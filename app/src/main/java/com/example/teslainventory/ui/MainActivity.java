@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
                 intent.putExtra(DetailsActivity.EXTRA_ID_2, tesla.getId());
                 intent.putExtra(DetailsActivity.EXTRA_MODEL_2, tesla.getModel());
+                intent.putExtra(DetailsActivity.EXTRA_IMAGE_2, tesla.getTeslaImage());
                 intent.putExtra(DetailsActivity.EXTRA_DESCRIPTION_2, tesla.getDescription());
                 intent.putExtra(DetailsActivity.EXTRA_INVENTORY_TYPE_2, tesla.getInventoryType());
                 intent.putExtra(DetailsActivity.EXTRA_EXTERIOR_PAINT_2, tesla.getExteriorPaint());

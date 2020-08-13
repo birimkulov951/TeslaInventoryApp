@@ -1,15 +1,19 @@
 package com.example.teslainventory.ui;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +36,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.util.LogTime;
 import com.example.teslainventory.R;
 
 import java.io.ByteArrayOutputStream;
@@ -51,7 +56,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
     public static final String EXTRA_PRIORITY = "com.example.teslainventory.EXTRA_PRIORITY";
 
     // View Casting
-    private ImageView teslaPhoto;
+    private ImageView mImageView;
     private ImageButton btPrevious, btNext, addPhoto;
     private TextSwitcher textSwitcher;
     private String[] models = {"Model S","Model 3", "Model X","Model Y","Roadster(2020)","Tesla Semi","Cybertruck","Roadster(2008)"};
@@ -63,7 +68,6 @@ public class AddEditTeslaActivity extends AppCompatActivity {
 
     private boolean teslaHasChanged = false;
     private Intent intent;
-    private Bitmap bitmap;
     private File finalFile;
 
     /**
@@ -82,7 +86,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_tesla);
 
-        teslaPhoto = findViewById(R.id.tesla_image);
+        mImageView = findViewById(R.id.tesla_image);
         addPhoto = findViewById(R.id.add_photo);
         addPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +122,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         if (intent.hasExtra(EXTRA_ID)) {
             setTitle("Edit Tesla");
             textSwitcher.setText(intent.getStringExtra(EXTRA_MODEL));
+            mImageView.setImageBitmap(showImageByUriPath(intent.getStringExtra(EXTRA_IMAGE)));
             editDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
             editInventoryType.setText(intent.getStringExtra(EXTRA_INVENTORY_TYPE));
             editExteriorPaint.setText(intent.getStringExtra(EXTRA_EXTERIOR_PAINT));
@@ -132,6 +137,10 @@ public class AddEditTeslaActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Camera takes picture and return picture file path
+     *
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -139,34 +148,17 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            teslaPhoto.setImageBitmap(imageBitmap);
+            mImageView.setImageBitmap(imageBitmap);
 
             // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
             Uri tempUri = getImageUri(getApplicationContext(), imageBitmap);
 
-            System.out.println("Hello1" + tempUri);
-
             // CALL THIS METHOD TO GET THE ACTUAL PATH
             finalFile = new File(getRealPathFromURI(tempUri));
 
-            System.out.println("Hello2" + finalFile);
+            System.out.println("Debug: " + tempUri + " - " + imageBitmap);
         }
     }
-
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
-    }
-
-    public String getRealPathFromURI(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        cursor.moveToFirst();
-        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-        return cursor.getString(idx);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -174,6 +166,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.add_tesla_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -188,7 +181,16 @@ public class AddEditTeslaActivity extends AppCompatActivity {
     private void saveTeslaCar() {
         int id = intent.getIntExtra(EXTRA_ID, -1);
         TextView model = (TextView) textSwitcher.getCurrentView();
-        String image = finalFile.toString();
+        String image;
+        if (finalFile != null) {
+
+            image = finalFile.toString();
+
+        } else {
+
+            image = null;
+
+        }
         String description = editDescription.getText().toString();
         String inventoryType = editInventoryType.getText().toString();
         String exteriorPaint = editExteriorPaint.getText().toString();
@@ -288,6 +290,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
                 if (dialog != null) {
                     dialog.dismiss();
                 }
+
             }
 
         });
@@ -340,4 +343,23 @@ public class AddEditTeslaActivity extends AppCompatActivity {
         numberPickerPriority.setMaxValue(5);
     }
 
+    private Bitmap showImageByUriPath(String uriPathStr) {
+        File imgFile = new  File(uriPathStr);
+        Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+        return myBitmap;
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
+    }
 }
