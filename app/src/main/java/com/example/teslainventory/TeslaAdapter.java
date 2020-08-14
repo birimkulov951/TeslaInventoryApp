@@ -21,6 +21,10 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
 
     private OnItemClickListener listener;
 
+    public TeslaAdapter() {
+        super(DIFF_CALLBACK);
+    }
+
     private static final DiffUtil.ItemCallback<Tesla> DIFF_CALLBACK = new DiffUtil.ItemCallback<Tesla>() {
         @Override
         public boolean areItemsTheSame(@NonNull Tesla oldItem, @NonNull Tesla newItem) {
@@ -40,10 +44,6 @@ public class TeslaAdapter extends ListAdapter<Tesla, TeslaAdapter.TeslaHolder> {
                     oldItem.getPriority() == newItem.getPriority();
         }
     };
-
-    public TeslaAdapter() {
-        super(DIFF_CALLBACK);
-    }
 
     @NonNull
     @Override

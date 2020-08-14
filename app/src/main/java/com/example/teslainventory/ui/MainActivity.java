@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.teslainventory.MainContract;
+import com.example.teslainventory.MainPresenter;
 import com.example.teslainventory.R;
 import com.example.teslainventory.TeslaAdapter;
 import com.example.teslainventory.TeslaViewModel;
@@ -27,13 +29,16 @@ import com.example.teslainventory.room.Tesla;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.MissingFormatArgumentException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainContract.View {
+
+    private MainContract.Presenter presenter;
 
     public static final int ADD_TESLA_REQUEST = 1;
     public static final int EDIT_TESLA_REQUEST = 2;
 
-    private TeslaViewModel inventoryViewModel;
+    //private TeslaViewModel inventoryViewModel;
     private TextView mEmptyText,mEmptyText2;
 
     @Override
@@ -60,8 +65,25 @@ public class MainActivity extends AppCompatActivity {
         final TeslaAdapter adapter = new TeslaAdapter();
         recyclerView.setAdapter(adapter);
 
+        presenter = new MainPresenter(this, getApplication());
+        presenter.getAllTeslaCars().observe(this, new Observer<List<Tesla>>() {
+            @Override
+            public void onChanged(List<Tesla> teslas) {
+                adapter.submitList(teslas);
+                if (presenter.getAllTeslaCarsSize() == 0) {
+                    mEmptyText.setVisibility(View.VISIBLE);
+                    mEmptyText2.setVisibility(View.VISIBLE);
+                } else {
+                    mEmptyText.setVisibility(View.INVISIBLE);
+                    mEmptyText2.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+
+
         //inventoryViewModel = new ViewModelProvider(this).get(TeslaViewModel.class);
-        inventoryViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(TeslaViewModel.class);
+       /* inventoryViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(TeslaViewModel.class);
         inventoryViewModel.getAllTeslaCars().observe(this, new Observer<List<Tesla>>() {
             @Override
             public void onChanged(List<Tesla> teslaCars) {
@@ -74,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     mEmptyText2.setVisibility(View.INVISIBLE);
                 }
             }
-        });
+        });*/
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -83,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                inventoryViewModel.delete(adapter.getTeslaAt(viewHolder.getAdapterPosition()));
+                presenter.delete(adapter.getTeslaAt(viewHolder.getAdapterPosition()));
                 Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
 
             }
@@ -126,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
             Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
 
-            inventoryViewModel.insert(tesla);
+            presenter.insert(tesla);
 
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
 
@@ -152,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
             tesla.setId(id);
 
-            inventoryViewModel.update(tesla);
+            presenter.update(tesla);
 
             Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
 
@@ -171,14 +193,14 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.delete_all_notes:
 
-                if (inventoryViewModel.getAllTeslaCarsSize()>0){
+                if (presenter.getAllTeslaCarsSize()>0){
                     AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
                     builder.setTitle("Delete All");
                     builder.setMessage("You will lose all data!");
                     builder.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            inventoryViewModel.deleteAllTesla();
+                            presenter.deleteAllTesla();
                             Toast.makeText(getApplication(), "All Tesla cars deleted", Toast.LENGTH_SHORT).show();
                         }
                     });
