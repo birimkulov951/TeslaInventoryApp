@@ -2,43 +2,44 @@ package com.example.teslainventory.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.teslainventory.MainContract;
-import com.example.teslainventory.MainPresenter;
+import com.example.teslainventory.mvp.MainContract;
+import com.example.teslainventory.mvp.MainPresenter;
 import com.example.teslainventory.R;
 import com.example.teslainventory.TeslaAdapter;
-import com.example.teslainventory.TeslaViewModel;
+import com.example.teslainventory.TeslaAdapter.OnItemClickListener;
 import com.example.teslainventory.room.Tesla;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
-import java.util.MissingFormatArgumentException;
 
 public class MainActivity extends AppCompatActivity implements MainContract.View {
 
-    private MainContract.Presenter presenter;
+
+    private static final String TAG = "MainActivity";
 
     public static final int ADD_TESLA_REQUEST = 1;
     public static final int EDIT_TESLA_REQUEST = 2;
 
-    //private TeslaViewModel inventoryViewModel;
+    private MainContract.Presenter presenter;
+    private final TeslaAdapter adapter = new TeslaAdapter();
+    private RecyclerView recyclerView;
+
+    private FloatingActionButton buttonAddNote;
     private TextView mEmptyText,mEmptyText2;
 
     @Override
@@ -48,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
         mEmptyText = findViewById(R.id.empty_text);
         mEmptyText2 = findViewById(R.id.empty_text_2);
+        buttonAddNote = findViewById(R.id.button_add_tesla_car);
 
-        FloatingActionButton buttonAddNote = findViewById(R.id.button_add_tesla_car);
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,81 +59,36 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             }
         });
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
-        final TeslaAdapter adapter = new TeslaAdapter();
         recyclerView.setAdapter(adapter);
 
         presenter = new MainPresenter(this, getApplication());
+
         presenter.getAllTeslaCars().observe(this, new Observer<List<Tesla>>() {
             @Override
-            public void onChanged(List<Tesla> teslas) {
-                adapter.submitList(teslas);
-                if (presenter.getAllTeslaCarsSize() == 0) {
-                    mEmptyText.setVisibility(View.VISIBLE);
-                    mEmptyText2.setVisibility(View.VISIBLE);
-                } else {
-                    mEmptyText.setVisibility(View.INVISIBLE);
-                    mEmptyText2.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-
-
-
-        //inventoryViewModel = new ViewModelProvider(this).get(TeslaViewModel.class);
-       /* inventoryViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(TeslaViewModel.class);
-        inventoryViewModel.getAllTeslaCars().observe(this, new Observer<List<Tesla>>() {
-            @Override
             public void onChanged(List<Tesla> teslaCars) {
+
                 adapter.submitList(teslaCars);
-                if (inventoryViewModel.getAllTeslaCarsSize() == 0) {
-                    mEmptyText.setVisibility(View.VISIBLE);
-                    mEmptyText2.setVisibility(View.VISIBLE);
+                if (presenter.getAllTeslaCarsSize() == 0) {
+                    showEmptyStore();
                 } else {
-                    mEmptyText.setVisibility(View.INVISIBLE);
-                    mEmptyText2.setVisibility(View.INVISIBLE);
+                    hideEmptyStore();
                 }
-            }
-        });*/
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                presenter.delete(adapter.getTeslaAt(viewHolder.getAdapterPosition()));
-                Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
-
-            }
-        }).attachToRecyclerView(recyclerView);
-
-        adapter.setOnItemClickListener(new TeslaAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Tesla tesla) {
-                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                intent.putExtra(DetailsActivity.EXTRA_ID_2, tesla.getId());
-                intent.putExtra(DetailsActivity.EXTRA_MODEL_2, tesla.getModel());
-                intent.putExtra(DetailsActivity.EXTRA_IMAGE_2, tesla.getTeslaImage());
-                intent.putExtra(DetailsActivity.EXTRA_DESCRIPTION_2, tesla.getDescription());
-                intent.putExtra(DetailsActivity.EXTRA_INVENTORY_TYPE_2, tesla.getInventoryType());
-                intent.putExtra(DetailsActivity.EXTRA_EXTERIOR_PAINT_2, tesla.getExteriorPaint());
-                intent.putExtra(DetailsActivity.EXTRA_AVAILABLE_QUANTITY_2, tesla.getAvailableQuantity());
-                intent.putExtra(DetailsActivity.EXTRA_PRICE_2, tesla.getPrice());
-                intent.putExtra(DetailsActivity.EXTRA_PRIORITY_2, tesla.getPriority());
-                startActivityForResult(intent, EDIT_TESLA_REQUEST);
             }
         });
+
+        swipeToDelete();
+
+        setOnItemClickListener();
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == ADD_TESLA_REQUEST && resultCode == RESULT_OK) {
@@ -146,8 +102,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             String price = data.getStringExtra(AddEditTeslaActivity.EXTRA_PRICE);
             int priority = data.getIntExtra(AddEditTeslaActivity.EXTRA_PRIORITY, 1);
 
-            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
-
+            Tesla tesla = new Tesla(model,
+                    "Price: " + price,
+                    "Available quantity: " + availabilityQuantity,
+                    description,
+                    "Inventory type: " + inventoryType,
+                    "Exterior paint: " + exteriorPaint,image,
+                    null,null,priority);
             presenter.insert(tesla);
 
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
@@ -170,7 +131,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             String price = data.getStringExtra(DetailsActivity.EXTRA_PRICE_2);
             int priority = data.getIntExtra(DetailsActivity.EXTRA_PRIORITY_2, 1);
 
-            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
+            Tesla tesla = new Tesla(model,
+                    "Price: " + price,
+                    "Available quantity: " + availabilityQuantity,
+                    description,
+                    "Inventory type: " + inventoryType,
+                    "Exterior paint: " + exteriorPaint,image,
+                    null,null,priority);
 
             tesla.setId(id);
 
@@ -216,5 +183,60 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         }
     }
 
+    @Override
+    public void setOnItemClickListener() {
 
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(Tesla tesla) {
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                intent.putExtra(DetailsActivity.EXTRA_ID_2, tesla.getId());
+                intent.putExtra(DetailsActivity.EXTRA_MODEL_2, tesla.getModel());
+                intent.putExtra(DetailsActivity.EXTRA_IMAGE_2, tesla.getTeslaImage());
+                intent.putExtra(DetailsActivity.EXTRA_DESCRIPTION_2, tesla.getDescription());
+                intent.putExtra(DetailsActivity.EXTRA_INVENTORY_TYPE_2, tesla.getInventoryType());
+                intent.putExtra(DetailsActivity.EXTRA_EXTERIOR_PAINT_2, tesla.getExteriorPaint());
+                intent.putExtra(DetailsActivity.EXTRA_AVAILABLE_QUANTITY_2, tesla.getAvailableQuantity());
+                intent.putExtra(DetailsActivity.EXTRA_PRICE_2, tesla.getPrice());
+                intent.putExtra(DetailsActivity.EXTRA_PRIORITY_2, tesla.getPriority());
+                startActivityForResult(intent, EDIT_TESLA_REQUEST);
+            }
+        });
+
+    }
+
+    @Override
+    public void swipeToDelete() {
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                presenter.delete(adapter.getTeslaAt(viewHolder.getAdapterPosition()));
+                Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+            }
+
+        }).attachToRecyclerView(recyclerView);
+
+    }
+
+    @Override
+    public void showEmptyStore() {
+
+        mEmptyText.setVisibility(View.VISIBLE);
+        mEmptyText2.setVisibility(View.VISIBLE);
+
+    }
+
+    @Override
+    public void hideEmptyStore() {
+
+        mEmptyText.setVisibility(View.INVISIBLE);
+        mEmptyText2.setVisibility(View.INVISIBLE);
+
+    }
 }

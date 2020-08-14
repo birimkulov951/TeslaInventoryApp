@@ -15,14 +15,15 @@
         <ImageView
             android:id="@+id/image_view"
             android:layout_width="250dp"
-            android:layout_height="100dp"
+            android:layout_height="300dp"
             android:layout_centerHorizontal="true"/>
 
         <TextView
             android:id="@+id/model_2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Model"
+            android:gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:layout_below="@id/image_view"/>

@@ -1,4 +1,4 @@
-package com.example.teslainventory;
+package com.example.teslainventory.mvp;
 
 import androidx.lifecycle.LiveData;
 
@@ -9,6 +9,14 @@ import java.util.List;
 public interface MainContract {
 
     interface View {
+
+        void setOnItemClickListener();
+
+        void swipeToDelete();
+
+        void showEmptyStore();
+
+        void hideEmptyStore();
 
     }
 
@@ -26,5 +34,6 @@ public interface MainContract {
         void deleteAllTesla();
 
         int getAllTeslaCarsSize();
+
     }
 }

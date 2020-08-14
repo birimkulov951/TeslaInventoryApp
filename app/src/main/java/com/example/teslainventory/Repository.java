@@ -34,11 +34,9 @@ public class Repository {
     public void deleteAllTesla() {
         new DeleteAllTeslaAsyncTask(teslaDao).execute();
     }
-
     public LiveData<List<Tesla>> getAllTesla() {
         return allTeslaCars;
     }
-
 
    private static class InsertTeslaAsyncTask extends AsyncTask<Tesla, Void, Void> {
 

@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_marginRight="6dp"
     android:layout_marginLeft="6dp"
-    android:layout_marginTop="6dp">
+    android:layout_marginTop="6dp"
+    android:background="#FDFFF5">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -14,7 +15,8 @@
         <ImageView
             android:id="@+id/image_view_tesla"
             android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_height="150dp"
+            android:padding="8dp"
             android:src="@mipmap/ic_launcher"/>
 
         <LinearLayout
@@ -28,8 +30,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Model Y"
-                android:maxLines="1"
-                android:ellipsize="end"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
@@ -37,6 +37,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Absolutely Brand New Tesla. "
+                android:visibility="gone"
+                android:maxLines="3"
+                android:ellipsize="end"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
             <TextView

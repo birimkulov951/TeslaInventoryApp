@@ -1,4 +1,4 @@
-package com.example.teslainventory;
+package com.example.teslainventory.mvvm;
 
 import android.app.Application;
 
@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.example.teslainventory.Repository;
 import com.example.teslainventory.room.Tesla;
 
 import java.util.List;
