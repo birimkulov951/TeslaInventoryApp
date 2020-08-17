@@ -102,13 +102,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             String price = data.getStringExtra(AddEditTeslaActivity.EXTRA_PRICE);
             int priority = data.getIntExtra(AddEditTeslaActivity.EXTRA_PRIORITY, 1);
 
-            Tesla tesla = new Tesla(model,
-                    "Price: " + price,
-                    "Available quantity: " + availabilityQuantity,
-                    description,
-                    "Inventory type: " + inventoryType,
-                    "Exterior paint: " + exteriorPaint,image,
-                    null,null,priority);
+            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
+
             presenter.insert(tesla);
 
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
@@ -131,13 +126,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             String price = data.getStringExtra(DetailsActivity.EXTRA_PRICE_2);
             int priority = data.getIntExtra(DetailsActivity.EXTRA_PRIORITY_2, 1);
 
-            Tesla tesla = new Tesla(model,
-                    "Price: " + price,
-                    "Available quantity: " + availabilityQuantity,
-                    description,
-                    "Inventory type: " + inventoryType,
-                    "Exterior paint: " + exteriorPaint,image,
-                    null,null,priority);
+            Tesla tesla = new Tesla(model,price,availabilityQuantity,description,inventoryType,exteriorPaint,image,null,null,priority);
 
             tesla.setId(id);
 

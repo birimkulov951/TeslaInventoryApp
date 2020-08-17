@@ -188,7 +188,7 @@ public class AddEditTeslaActivity extends AppCompatActivity {
 
         } else {
 
-            image = null;
+            image = intent.getStringExtra(EXTRA_IMAGE);
 
         }
         String description = editDescription.getText().toString();
